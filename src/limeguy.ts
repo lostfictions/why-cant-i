@@ -8,10 +8,13 @@ import { DATA_DIR } from "./env";
 import { randomInArray } from "./util/index";
 import pluralize from "./util/pluralize";
 
+const staticDataDir = path.join(__dirname, "../data");
+const limeguyPath = path.join(staticDataDir, "limeguy.jpg");
+const fontPathLarge = path.join(staticDataDir, "impact_160.fnt");
+const fontPathSmall = path.join(staticDataDir, "impact_120.fnt");
+
 const imgDir = path.join(DATA_DIR, "categories");
-const limeguyPath = path.join(DATA_DIR, "limeguy.jpg");
-const fontPathLarge = path.join(DATA_DIR, "impact.fnt");
-const fontPathSmall = path.join(DATA_DIR, "impact_smaller.fnt");
+
 const outDir = tmpdir();
 
 let categories: string[] = [];
@@ -24,10 +27,17 @@ if (!fs.existsSync(imgDir)) {
   }
 }
 
+let categoriesBag = [...categories];
 async function getRandomImages(
   count: number
 ): Promise<{ item: string; images: Jimp[] }> {
-  const folderName = randomInArray(categories);
+  const folderName = randomInArray(categoriesBag);
+  categoriesBag.splice(categoriesBag.indexOf(folderName), 1);
+  if (categoriesBag.length === 0) {
+    console.log("Categories bag exhausted. Refilling...");
+    categoriesBag = [...categories];
+  }
+
   const item = folderName.replace(/_/g, " ");
 
   const fns = fs.readdirSync(path.join(imgDir, folderName));
@@ -87,7 +97,7 @@ export async function makeLimeguy(): Promise<{
 
   (limeguy as any).print(
     fontSmall,
-    0,
+    30,
     limeguy.bitmap.height - 100 - 160,
     `hold all these ${pluralize(item)}?`
   );
