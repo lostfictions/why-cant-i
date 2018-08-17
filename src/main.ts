@@ -1,9 +1,10 @@
 require("source-map-support").install(); // tslint:disable-line:no-require-imports
 
 import { scheduleJob } from "node-schedule";
+import { twoot, Configs as TwootConfigs } from "twoot";
 
 import { makeLimeguy } from "./limeguy";
-import { twoot, Configs as TwootConfigs } from "twoot";
+import pluralize from "./util/pluralize";
 
 import { MASTODON_SERVER, MASTODON_TOKEN, CRON_RULE } from "./env";
 
@@ -27,23 +28,6 @@ async function doTwoot(): Promise<void> {
     }
   } catch (e) {
     console.error("error while trying to twoot: ", e);
-  }
-}
-
-const isVowel = (char: string) => /^[aeiou]$/i.test(char);
-function pluralize(word: string) {
-  if (word.length < 1) return word;
-  switch (word[word.length - 1].toLowerCase()) {
-    case "s":
-    case "h":
-    case "x":
-      return word + "es";
-    case "y":
-      return !isVowel(word[word.length - 2])
-        ? word.substring(0, word.length - 1) + "ies"
-        : word + "s";
-    default:
-      return word + "s";
   }
 }
 
