@@ -2,56 +2,26 @@ require("source-map-support").install(); // tslint:disable-line:no-require-impor
 
 import { scheduleJob } from "node-schedule";
 
-import { makeHeathcliff } from "./heath";
+import { makeLimeguy } from "./limeguy";
 import { twoot, Configs as TwootConfigs } from "twoot";
-import { randomInArray } from "./util";
 
-import {
-  MASTODON_SERVER,
-  MASTODON_TOKEN,
-  isValidMastodonConfiguration,
-  TWITTER_CONSUMER_KEY as consumerKey,
-  TWITTER_CONSUMER_SECRET as consumerSecret,
-  TWITTER_ACCESS_KEY as accessKey,
-  TWITTER_ACCESS_SECRET as accessSecret,
-  isValidTwitterConfiguration,
-  CRON_RULE
-} from "./env";
+import { MASTODON_SERVER, MASTODON_TOKEN, CRON_RULE } from "./env";
 
-const twootConfigs: TwootConfigs = [];
-if (isValidMastodonConfiguration) {
-  twootConfigs.push({
+const twootConfigs: TwootConfigs = [
+  {
     token: MASTODON_TOKEN,
     server: MASTODON_SERVER
-  });
-}
-if (isValidTwitterConfiguration) {
-  twootConfigs.push({
-    consumerKey,
-    consumerSecret,
-    accessKey,
-    accessSecret
-  });
-}
-
-const messages = [
-  `Today's Heathcliff:`,
-  `Heathcliff comic for today:`,
-  `It's Heathcliff!`,
-  `Here's Heathcliff!`
+  }
 ];
 
-async function makeTwoot(): Promise<{ filename: string; status: string }> {
-  return {
-    filename: await makeHeathcliff(),
-    status: randomInArray(messages)
-  };
-}
-
 async function doTwoot(): Promise<void> {
-  const { filename, status } = await makeTwoot();
+  const { filename, item } = await makeLimeguy();
   try {
-    const urls = await twoot(twootConfigs, status, [filename]);
+    const urls = await twoot(
+      twootConfigs,
+      `why cant I, hold all these ${pluralize(item)}?`,
+      [filename]
+    );
     for (const url of urls) {
       console.log(`twooted at '${url}'!`);
     }
@@ -60,19 +30,37 @@ async function doTwoot(): Promise<void> {
   }
 }
 
-let job;
-if (process.argv.slice(2).includes("local")) {
-  const localJob = () =>
-    makeTwoot().then(({ filename, status }) =>
-      console.log(`${status} ${filename}`)
-    );
-  localJob();
-  job = scheduleJob("*/10 * * * * *", localJob);
-} else {
-  // we're running in production mode!
-  job = scheduleJob(CRON_RULE, doTwoot);
+const isVowel = (char: string) => /^[aeiou]$/i.test(char);
+function pluralize(word: string) {
+  if (word.length < 1) return word;
+  switch (word[word.length - 1].toLowerCase()) {
+    case "s":
+    case "h":
+    case "x":
+      return word + "es";
+    case "y":
+      return !isVowel(word[word.length - 2])
+        ? word.substring(0, word.length - 1) + "ies"
+        : word + "s";
+    default:
+      return word + "s";
+  }
 }
 
-const now = new Date(Date.now()).toUTCString();
-const next = (job.nextInvocation() as any).toDate().toUTCString(); // bad typings
-console.log(`[${now}] Bot is running! Next job scheduled for [${next}]`);
+if (process.argv.slice(2).includes("local")) {
+  const localJob = () =>
+    makeLimeguy().then(async ({ filename, item }) => {
+      console.log(filename);
+      console.log(pluralize(item));
+      setTimeout(localJob, 5000);
+    });
+
+  localJob();
+  console.log("Running locally!");
+} else {
+  // we're running in production mode!
+  const job = scheduleJob(CRON_RULE, doTwoot);
+  const now = new Date(Date.now()).toUTCString();
+  const next = (job.nextInvocation() as any).toDate().toUTCString(); // bad typings
+  console.log(`[${now}] Bot is running! Next job scheduled for [${next}]`);
+}
