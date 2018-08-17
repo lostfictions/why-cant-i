@@ -47,6 +47,17 @@ let filenameIndex = 0;
 
 let originalLimeguy: Jimp;
 
+// order matters! roughly background-to-foreground
+const limeCoords = [
+  [856, 1336],
+  [700, 1324],
+  [456, 1568],
+  [436, 1312],
+  [527, 1276],
+  [468, 1856],
+  [828, 1440]
+];
+
 export async function makeLimeguy(): Promise<{
   filename: string;
   item: string;
@@ -55,18 +66,15 @@ export async function makeLimeguy(): Promise<{
 
   const limeguy = originalLimeguy.clone();
 
-  const { item, images } = await getRandomImages(2);
+  const { item, images } = await getRandomImages(limeCoords.length);
 
-  limeguy.composite(
-    images[0],
-    832 - images[0].bitmap.width / 2,
-    1440 - images[0].bitmap.height / 2
-  );
-  limeguy.composite(
-    images[1],
-    476 - images[1].bitmap.width / 2,
-    1848 - images[1].bitmap.height / 2
-  );
+  for (let i = 0; i < limeCoords.length; i++) {
+    limeguy.composite(
+      images[i],
+      limeCoords[i][0] - images[i].bitmap.width / 2,
+      limeCoords[i][1] - images[i].bitmap.height / 2
+    );
+  }
 
   filenameIndex += 1;
   const filename = path.join(outDir, `whycanti_${filenameIndex}.jpg`);
