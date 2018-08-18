@@ -1,134 +1,18 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Readable } from "stream";
 import { tmpdir } from "os";
 
-import axios from "axios";
-import * as cheerio from "cheerio";
+import { createCanvas, loadImage, registerFont } from "canvas";
 
-import { randomInArray } from "./util/index";
 import pluralize from "./util/pluralize";
-
-import { DATA_DIR } from "./env";
-
-const {
-  createCanvas,
-  loadImage,
-  registerFont,
-  Image
-}: {
-  createCanvas(
-    width: number,
-    height: number
-  ): HTMLCanvasElement & {
-    createPNGStream(): Readable;
-  };
-  loadImage(path: string): Promise<ImageBitmap>;
-  registerFont(
-    path: string,
-    props: { family: string; weight?: string | number; style?: string }
-  ): void;
-  Image: {
-    new (width?: number, height?: number): HTMLImageElement;
-  };
-} = require("canvas");
+import getConceptImageUrls from "./images/get-concept-image-urls";
+import loadRemoteImage from "./images/load-remote-image";
 
 const staticDataDir = path.join(__dirname, "../data");
 const limeguyPath = path.join(staticDataDir, "limeguy.jpg");
-const concepts = require(path.join(staticDataDir, "concepts"));
-
 registerFont(path.join(staticDataDir, "impact.ttf"), { family: "Impact" });
 
 const outDir = tmpdir();
-
-let conceptsBag: Set<string>;
-try {
-  const conceptsFromFile = JSON.parse(
-    fs.readFileSync(path.join(DATA_DIR, "unused-concepts.json")).toString()
-  );
-  if (!Array.isArray(conceptsFromFile)) {
-    throw new Error("Concepts bag loaded from file is not an array!");
-  }
-  conceptsBag = new Set(conceptsFromFile);
-} catch (e) {
-  console.warn(`Cannot load concepts from file!\n[${e}]`);
-  refillConceptsBag();
-}
-
-function refillConceptsBag(): void {
-  console.log("Concepts bag exhausted. Refilling...");
-  conceptsBag = new Set(concepts);
-  fs.writeFileSync(
-    path.join(DATA_DIR, "unused-concepts.json"),
-    JSON.stringify([...conceptsBag], undefined, 2)
-  );
-}
-
-async function getRandomImages(
-  count: number
-): Promise<{ item: string; images: string[] }> {
-  const item = randomInArray([...conceptsBag]);
-  conceptsBag.delete(item);
-  if (conceptsBag.size === 0) {
-    refillConceptsBag();
-  } else {
-    fs.writeFileSync(
-      path.join(DATA_DIR, "unused-concepts.json"),
-      JSON.stringify([...conceptsBag], undefined, 2)
-    );
-  }
-
-  const images = await imageSearch(item, false, count);
-
-  if (images.length < count) {
-    console.warn(`Couldn't find enough images when searching for "${item}"!`);
-  }
-
-  return {
-    item,
-    images
-  };
-}
-
-async function imageSearch(
-  query: string,
-  exact = true,
-  minimumCount?: number
-): Promise<string[]> {
-  const res = await axios.get("https://google.com/search", {
-    params: {
-      q: query,
-      tbm: "isch", // perform an image search
-      nfpr: exact ? 1 : 0, // exact search, don't correct typos
-      tbs: "ic:trans"
-    },
-    timeout: 5000,
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) " +
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36"
-    }
-  });
-
-  const $ = cheerio.load(res.data);
-  const metaLinks = $(".rg_meta");
-  const urls: string[] = [];
-  metaLinks.each((_i, el) => {
-    if (el.children.length > 0 && "data" in el.children[0]) {
-      const metadata = JSON.parse((el.children[0] as any).data);
-      if (metadata.ou) {
-        urls.push(metadata.ou);
-      }
-      // Elements without metadata.ou are subcategory headings in the results page.
-    }
-  });
-
-  if (minimumCount != null && exact && urls.length < minimumCount) {
-    // if we don't have the minimum desired, append an inexact search
-    return [...new Set(urls.concat(await imageSearch(query, false)))];
-  }
-  return urls;
-}
 
 let filenameIndex = 0;
 
@@ -148,20 +32,6 @@ const limeCoords = [
 ];
 // also unscaled!
 const limeSize = 140;
-
-async function loadRemoteImage(src: string): Promise<HTMLImageElement> {
-  const resp = await axios.get(src, { responseType: "arraybuffer" });
-  const buff = Buffer.from(resp.data);
-  const image = new Image();
-  const imageLoad = new Promise((res, rej) => {
-    image.onload = res;
-    image.onerror = rej;
-  });
-  image.src = buff as any;
-
-  await imageLoad;
-  return image;
-}
 
 export async function makeLimeguy(): Promise<{
   filename: string;
@@ -183,7 +53,7 @@ export async function makeLimeguy(): Promise<{
   const adjustedCoords = limeCoords.map(([x, y]) => [x * scale, y * scale]);
   const size = limeSize * scale;
 
-  const { item, images } = await getRandomImages(limeCoords.length);
+  const { item, images } = await getConceptImageUrls(limeCoords.length);
 
   let imgIndex = 0;
   for (const [limeX, limeY] of adjustedCoords) {
