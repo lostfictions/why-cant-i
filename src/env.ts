@@ -7,7 +7,7 @@ const env = envalid.cleanEnv(
     DATA_DIR: envalid.str({ default: "persist" }),
     MASTODON_SERVER: envalid.url({ default: "https://mastodon.social" }),
     MASTODON_TOKEN: envalid.str(),
-    CRON_RULE: envalid.str({ default: "0 5,11,17,23 * * *" })
+    CRON_RULE: envalid.str({ default: "0 3,7,11,15,19,23 * * *" })
   },
   { strict: true }
 );

@@ -31,20 +31,36 @@ async function doTwoot(): Promise<void> {
   }
 }
 
-if (process.argv.slice(2).includes("local")) {
+const argv = process.argv.slice(2);
+
+if (argv.includes("local")) {
   const localJob = () =>
     makeLimeguy().then(async ({ filename, item }) => {
       console.log(`why cant I, hold all these ${pluralize(item)}?`);
       console.log(filename, "\n");
-      setTimeout(localJob, 5000);
+      if (!argv.includes("once")) {
+        setTimeout(localJob, 5000);
+      }
     });
 
   localJob();
   console.log("Running locally!");
 } else {
   // we're running in production mode!
-  const job = scheduleJob(CRON_RULE, doTwoot);
-  const now = new Date(Date.now()).toUTCString();
-  const next = (job.nextInvocation() as any).toDate().toUTCString(); // bad typings
-  console.log(`[${now}] Bot is running! Next job scheduled for [${next}]`);
+  if (argv.includes("once")) {
+    console.log("Running single iteration!");
+    doTwoot().then(() => console.log("Done."));
+  } else {
+    const job = scheduleJob(CRON_RULE, () => {
+      doTwoot().then(() => {
+        setTimeout(() => {
+          const next = (job.nextInvocation() as any).toDate().toUTCString(); // bad typings
+          console.log(`Next job scheduled for [${next}]`);
+        });
+      });
+    });
+    const now = new Date(Date.now()).toUTCString();
+    const next = (job.nextInvocation() as any).toDate().toUTCString(); // bad typings
+    console.log(`[${now}] Bot is running! Next job scheduled for [${next}]`);
+  }
 }
