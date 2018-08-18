@@ -71,7 +71,9 @@ export async function makeLimeguy(): Promise<{
         );
         didDraw = true;
       } catch (e) {
-        console.error(`can't load url: ${images[imgIndex]}:\n[${e}]\n`);
+        // We don't care about (most) failures. Just retry with another URL.
+        // Checking for real, persistent errors is I guess TODO.
+        // console.warn(`can't load url: ${images[imgIndex]}:\n[${e}]\n`);
       }
       imgIndex++;
     }
@@ -93,7 +95,7 @@ export async function makeLimeguy(): Promise<{
   ctx.textBaseline = "bottom";
 
   if (ctx.measureText(bottomText).width > canvas.width) {
-    console.log("shrank");
+    // shrink the font size if we're too wide
     ctx.lineWidth = 1;
     ctx.font = "30px Impact";
   }
