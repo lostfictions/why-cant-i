@@ -31,7 +31,7 @@ const limeCoords = [
   [828, 1440]
 ];
 // also unscaled!
-const limeSize = 140;
+const limeSize = 250;
 
 export async function makeLimeguy(): Promise<{
   filename: string;
