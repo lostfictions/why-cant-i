@@ -247,9 +247,9 @@ camelcase@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-2.1.1.tgz#7c1d16d679a1bbe59ca02cacecfb011e201f5a1f"
 
-canvas@^2.0.0-alpha.13:
+canvas@lostfictions/node-canvas#master:
   version "2.0.0-alpha.13"
-  resolved "https://registry.yarnpkg.com/canvas/-/canvas-2.0.0-alpha.13.tgz#c670de1ab6a33efab9ce5f63663672cc2be70c9f"
+  resolved "https://codeload.github.com/lostfictions/node-canvas/tar.gz/82c867da8e0b569b502d709e3de4e4ea56c00fab"
   dependencies:
     nan "^2.9.2"
     node-pre-gyp "^0.9.0"

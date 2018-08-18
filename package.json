@@ -15,7 +15,7 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "axios": "^0.18.0",
-    "canvas": "^2.0.0-alpha.13",
+    "canvas": "lostfictions/node-canvas#master",
     "cheerio": "^0.22.0",
     "envalid": "^4.1.2",
     "jimp": "^0.2.28",
