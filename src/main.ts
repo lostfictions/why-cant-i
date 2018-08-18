@@ -36,8 +36,9 @@ const argv = process.argv.slice(2);
 if (argv.includes("local")) {
   const localJob = () =>
     makeLimeguy().then(async ({ filename, item }) => {
-      console.log(`why cant I, hold all these ${pluralize(item)}?`);
-      console.log(filename, "\n");
+      console.log(
+        `why cant I, hold all these ${pluralize(item)}? file://${filename}\n`
+      );
       if (!argv.includes("once")) {
         setTimeout(localJob, 5000);
       }

@@ -6,6 +6,7 @@
   "main": "dist/main.js",
   "scripts": {
     "start": "node dist/main.js",
+    "twoot-one": "node dist/main.js once",
     "build": "rm -rf dist/ && tsc",
     "test": "tsc --noEmit && eslint 'src/**' && prettier 'src/**' -l",
     "watch": "tsc -w",
