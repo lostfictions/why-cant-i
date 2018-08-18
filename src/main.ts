@@ -1,4 +1,4 @@
-require("source-map-support").install(); // tslint:disable-line:no-require-imports
+require("source-map-support").install();
 
 import { scheduleJob } from "node-schedule";
 import { twoot, Configs as TwootConfigs } from "twoot";
@@ -34,8 +34,8 @@ async function doTwoot(): Promise<void> {
 if (process.argv.slice(2).includes("local")) {
   const localJob = () =>
     makeLimeguy().then(async ({ filename, item }) => {
-      console.log(filename);
-      console.log(pluralize(item));
+      console.log(`why cant I, hold all these ${pluralize(item)}?`);
+      console.log(filename, "\n");
       setTimeout(localJob, 5000);
     });
 
