@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { tmpdir } from "os";
 
-import { createCanvas, loadImage, registerFont } from "canvas";
+import { createCanvas, loadImage, registerFont, Image } from "canvas";
 
 import pluralize from "./util/pluralize";
 import getConceptImageUrls from "./images/get-concept-image-urls";
@@ -15,9 +15,9 @@ const outDir = tmpdir();
 
 let filenameIndex = 0;
 
-let originalLimeguy: ImageBitmap;
-let midgroundLimeguy: ImageBitmap;
-let foregroundLimeguy: ImageBitmap;
+let originalLimeguy: Image;
+let midgroundLimeguy: Image;
+let foregroundLimeguy: Image;
 
 const maxHeight = 800;
 
@@ -82,32 +82,23 @@ export async function makeLimeguy(): Promise<{
   ctx.strokeText(topText, canvas.width / 2, 5);
 
   const bottomText = `hold all these ${pluralize(item)}?`;
-  ctx.font = "50px Impact";
   ctx.textBaseline = "bottom";
 
   // shrink the font size if we're too wide.
-  // we add a few characters of padding to try to compensate for node-canvas'
-  // buggy discrepancies between fillText and strokeText.
+  // we add a few characters of padding to try to compensate for the use of strokeText
+  //
   // note that shrinking the text may not be necessary in the first place with a
   // real canvas -- the latter has a "maxWidth" parameter when drawing text, but
-  // it's broken in node-canvas.
-  if (ctx.measureText(bottomText + "xx").width > canvas.width) {
-    ctx.lineWidth = 1;
-    ctx.font = "30px Impact";
-  }
+  // it's broken or buggy in node-canvas.
+  let fontSize = 50;
+  do {
+    fontSize -= 1;
+    ctx.font = `${fontSize}px Impact`;
+    if (fontSize < 1) throw new Error("node-canvas will never be satisfied");
+  } while (ctx.measureText(bottomText + "xx").width > canvas.width);
 
-  ctx.fillText(
-    bottomText,
-    canvas.width / 2,
-    canvas.height - 10,
-    canvas.width - 20
-  );
-  ctx.strokeText(
-    bottomText,
-    canvas.width / 2,
-    canvas.height - 10,
-    canvas.width - 20
-  );
+  ctx.fillText(bottomText, canvas.width / 2, canvas.height - 10);
+  ctx.strokeText(bottomText, canvas.width / 2, canvas.height - 10);
 
   filenameIndex += 1;
   const filename = path.join(outDir, `whycanti_${filenameIndex}.png`);
