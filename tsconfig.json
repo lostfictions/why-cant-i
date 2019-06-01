@@ -5,15 +5,16 @@
     "outDir": "dist",
     "allowJs": true,
     "strict": true,
-    "lib":[
+    "lib": [
       "es2017",
       "dom"
     ],
+    "esModuleInterop": true,
     "sourceMap": true,
     "rootDir": "./src",
     "noUnusedLocals": true,
     "noUnusedParameters": true
-	},
+  },
   "include": [
     "./src/**/*"
   ]

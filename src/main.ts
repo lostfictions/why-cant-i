@@ -1,67 +1,58 @@
 require("source-map-support").install();
-
-import { scheduleJob } from "node-schedule";
-import { twoot, Configs as TwootConfigs } from "twoot";
+import { createReadStream } from "fs";
+import Masto from "masto";
+import retry from "async-retry";
+import uuid from "uuid/v4";
 
 import { makeLimeguy } from "./limeguy";
 import pluralize from "./util/pluralize";
 
-import { MASTODON_SERVER, MASTODON_TOKEN, CRON_RULE } from "./env";
-
-const twootConfigs: TwootConfigs = [
-  {
-    token: MASTODON_TOKEN,
-    server: MASTODON_SERVER
-  }
-];
+import { MASTODON_SERVER, MASTODON_TOKEN } from "./env";
 
 async function doTwoot(): Promise<void> {
-  const { filename, item } = await makeLimeguy();
-  try {
-    const urls = await twoot(
-      twootConfigs,
-      `why cant I, hold all these ${pluralize(item)}?`,
-      [filename]
-    );
-    for (const url of urls) {
-      console.log(`twooted at '${url}'!`);
-    }
-  } catch (e) {
-    console.error("error while trying to twoot: ", e);
-  }
+  const { filename, item } = await retry(makeLimeguy, { retries: 5 });
+
+  const description = `why cant I, hold all these ${pluralize(item)}?`;
+  const idempotencyKey = uuid();
+
+  const status = await retry(
+    async () => {
+      const masto = await Masto.login({
+        uri: MASTODON_SERVER,
+        accessToken: MASTODON_TOKEN
+      });
+
+      const { id } = await masto.uploadMediaAttachment({
+        file: createReadStream(filename),
+        description
+      });
+
+      return masto.createStatus(
+        {
+          status: description,
+          visibility: "public",
+          media_ids: [id]
+        },
+        idempotencyKey
+      );
+    },
+    { retries: 5 }
+  );
+
+  console.log(description);
+  console.log(`${status.created_at} -> ${status.uri}`);
 }
 
 const argv = process.argv.slice(2);
 
 if (argv.includes("local")) {
-  const localJob = () =>
-    makeLimeguy().then(async ({ filename, item }) => {
-      console.log(
-        `why cant I, hold all these ${pluralize(item)}? file://${filename}\n`
-      );
-      if (!argv.includes("once")) {
-        setTimeout(localJob, 5000);
-      }
-    });
-
-  localJob();
   console.log("Running locally!");
+  makeLimeguy().then(({ filename, item }) =>
+    console.log(
+      `why cant I, hold all these ${pluralize(item)}?\nfile://${filename}\n`
+    )
+  );
 } else {
-  // we're running in production mode!
-  if (argv.includes("once")) {
-    console.log("Running single iteration!");
-    doTwoot().then(() => console.log("Done."));
-  } else {
-    const job = scheduleJob(CRON_RULE, () => {
-      doTwoot().then(() => {
-        setTimeout(() => {
-          const next = (job.nextInvocation() as any).toDate().toUTCString(); // bad typings
-          console.log(`Next job scheduled for [${next}]`);
-        });
-      });
-    });
-    const now = new Date(Date.now()).toUTCString();
-    const next = (job.nextInvocation() as any).toDate().toUTCString(); // bad typings
-    console.log(`[${now}] Bot is running! Next job scheduled for [${next}]`);
-  }
+  console.log("Running in production!");
+  doTwoot().then(() => process.exit(0));
 }
