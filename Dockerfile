@@ -13,6 +13,5 @@ COPY . ./
 RUN yarn build
 
 ENV NODE_ENV=production
-ENV DEBUG=*
 ENTRYPOINT ["bash", "run.sh"]
 CMD ["yarn", "start"]
