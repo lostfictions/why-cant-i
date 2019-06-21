@@ -17,3 +17,5 @@ API tokens you put in there.)
 code is written in typescript, and the dockerfile will compile to js as part of
 its setup. run `yarn dev` if you're hacking on things and want to run locally
 and rebuild on changes.
+
+![why cant I, hold all these](https://i.imgur.com/gBDp6Qs.png)
