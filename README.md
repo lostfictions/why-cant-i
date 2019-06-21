@@ -1,4 +1,4 @@
-a nice bot 4 u.
+why cant i, hold all these different kinds of item
 
 pass these environment variables in if you want the bot to do stuff:
 
@@ -21,3 +21,6 @@ its setup. run `yarn dev` if you're hacking on things and want to run locally
 and rebuild on changes.
 
 ![why cant I, hold all these](https://i.imgur.com/gBDp6Qs.png)
+
+
+###### [more bots?](https://github.com/lostfictions?tab=repositories&q=botally)
