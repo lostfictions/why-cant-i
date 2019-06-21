@@ -1,5 +1,7 @@
 a nice bot 4 u.
 
+pass these environment variables in if you want the bot to do stuff:
+
 - `MASTODON_TOKEN`: a Mastodon user API token
 - `MASTODON_SERVER`: the instance to which API calls should be made (usually
   where the bot user lives.) (default: https://mastodon.social)
