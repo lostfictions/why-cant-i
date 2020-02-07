@@ -6,8 +6,6 @@ import { randomInArray } from "../util/index";
 import { DATA_DIR } from "../env";
 import imageSearch from "./image-search";
 
-const concepts = require(path.join(__dirname, "../../data", "concepts"));
-
 let conceptsBag: Set<string>;
 try {
   const conceptsFromFile = JSON.parse(
@@ -24,6 +22,7 @@ try {
 
 function refillConceptsBag(): void {
   console.log("Concepts bag exhausted. Refilling...");
+  const concepts = require(path.join(__dirname, "../../data", "concepts"));
   conceptsBag = new Set(concepts);
   fs.writeFileSync(
     path.join(DATA_DIR, "unused-concepts.json"),
@@ -31,9 +30,7 @@ function refillConceptsBag(): void {
   );
 }
 
-export default async function getConceptImageUrls(
-  count: number
-): Promise<{ item: string; images: string[] }> {
+function getRandomUnusedConcept(): string {
   const item = randomInArray([...conceptsBag]);
   conceptsBag.delete(item);
   if (conceptsBag.size === 0) {
@@ -45,19 +42,41 @@ export default async function getConceptImageUrls(
     );
   }
 
-  const images = await imageSearch(item, false, count);
+  return item;
+}
 
-  if (images.length < count) {
+export default async function getConceptImageUrls(
+  count: number
+): Promise<{ item: string; images: string[] }> {
+  let retries = 3;
+
+  /* eslint-disable no-await-in-loop */
+  while (retries > 0) {
+    const item = getRandomUnusedConcept();
+    const images = await imageSearch(item, false, count);
+
+    if (images.length >= count) {
+      return {
+        item,
+        images
+      };
+    }
+
     Sentry.withScope(scope => {
-      scope.setExtra("term", "item");
-      Sentry.captureException(
-        new Error(`Couldn't find enough images while searching!`)
-      );
+      scope.setExtra("term", item);
+      scope.setExtra("image count", images.length);
+      scope.setExtra("retries remaining", retries);
+      console.warn(`Couldn't find enough images while searching!`);
     });
-  }
 
-  return {
-    item,
-    images
-  };
+    retries--;
+
+    if (retries > 0) {
+      console.log("Retrying after delay, retries remaining:", retries);
+      await new Promise(res => setTimeout(res, 5000));
+    }
+  }
+  /* eslint-enable no-await-in-loop */
+
+  throw new Error(`Couldn't retrieve images and maximum retries exceeded`);
 }
