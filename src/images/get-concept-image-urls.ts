@@ -1,5 +1,6 @@
-import * as fs from "fs";
-import * as path from "path";
+import fs from "fs";
+import path from "path";
+import Sentry from "@sentry/node";
 
 import { randomInArray } from "../util/index";
 import { DATA_DIR } from "../env";
@@ -47,7 +48,12 @@ export default async function getConceptImageUrls(
   const images = await imageSearch(item, false, count);
 
   if (images.length < count) {
-    console.warn(`Couldn't find enough images when searching for "${item}"!`);
+    Sentry.withScope(scope => {
+      scope.setExtra("term", "item");
+      Sentry.captureException(
+        new Error(`Couldn't find enough images while searching!`)
+      );
+    });
   }
 
   return {
