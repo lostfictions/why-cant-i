@@ -117,6 +117,7 @@ export async function makeLimeguy(): Promise<{
       let didDraw = false;
       while (!didDraw && imgIndex < images.length) {
         try {
+          // eslint-disable-next-line no-await-in-loop
           const image = await loadRemoteImage(images[imgIndex]);
           const aspect = image.width / image.height;
           ctx.drawImage(

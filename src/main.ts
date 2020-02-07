@@ -47,6 +47,7 @@ const argv = process.argv.slice(2);
 
 if (argv.includes("local")) {
   console.log("Running locally!");
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   makeLimeguy().then(({ filename, item }) =>
     console.log(
       `why cant I, hold all these ${pluralize(item)}?\nfile://${filename}\n`
@@ -54,5 +55,6 @@ if (argv.includes("local")) {
   );
 } else {
   console.log("Running in production!");
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   doTwoot().then(() => process.exit(0));
 }

@@ -1,14 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2020",
     "module": "commonjs",
     "outDir": "dist",
     "allowJs": true,
     "strict": true,
-    "lib": [
-      "es2017",
-      "dom"
-    ],
     "esModuleInterop": true,
     "sourceMap": true,
     "rootDir": "./src",
@@ -16,6 +12,6 @@
     "noUnusedParameters": true
   },
   "include": [
-    "./src/**/*"
+    "src"
   ]
 }
