@@ -1,11 +1,9 @@
 {
   "root": true,
   "env": {
-    "browser": true,
     "es6": true,
     "node": true
   },
-  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "sourceType": "module",
     "ecmaFeatures": {
@@ -13,20 +11,20 @@
     },
     "project": "./tsconfig.json"
   },
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "parser": "@typescript-eslint/parser",
   "extends": [
     "eslint:recommended",
     "prettier",
     "prettier/@typescript-eslint"
   ],
+  "plugins": ["node", "@typescript-eslint"],
   "reportUnusedDisableDirectives": true,
   "ignorePatterns": ["*.test.ts.snap"],
   "rules": {
     "array-callback-return": "warn",
     "curly": ["warn", "multi-line", "consistent"],
     "default-case": "warn",
+    "default-case-last": "warn",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
     "no-await-in-loop": "warn",
     "no-buffer-constructor": "error",
@@ -59,6 +57,7 @@
     "no-unmodified-loop-condition": "warn",
     "no-unused-expressions": ["error", { "allowTaggedTemplates": true }],
     "no-unused-vars": "off",
+    "no-useless-backreference": "warn",
     "no-useless-call": "warn",
     "no-useless-computed-key": "warn",
     "no-useless-concat": "warn",
@@ -66,14 +65,17 @@
     "no-useless-return": "warn",
     "no-var": "warn",
     "no-void": "warn",
+    "one-var": ["warn", "never"],
     "prefer-const": "warn",
     "prefer-promise-reject-errors": "warn",
     "prefer-regex-literals": "warn",
     "symbol-description": "warn",
     "valid-typeof": ["error", { "requireStringLiterals": true }],
+    "node/no-deprecated-api": "warn",
     "@typescript-eslint/adjacent-overload-signatures": "warn",
     "@typescript-eslint/ban-types": "warn",
     "@typescript-eslint/consistent-type-assertions": "warn",
+    "@typescript-eslint/method-signature-style": "warn",
     "@typescript-eslint/no-array-constructor": "warn",
     "@typescript-eslint/no-extra-non-null-assertion": "warn",
     "@typescript-eslint/no-floating-promises": "warn",
@@ -96,18 +98,9 @@
     "@typescript-eslint/prefer-function-type": "warn",
     "@typescript-eslint/prefer-includes": "warn",
     "@typescript-eslint/prefer-optional-chain": "warn",
-    "@typescript-eslint/restrict-plus-operands": [
-      "warn",
-      {
-        "checkCompoundAssignments": true
-      }
-    ],
-    "@typescript-eslint/unbound-method": [
-      "warn",
-      {
-        "ignoreStatic": true
-      }
-    ],
+    "@typescript-eslint/restrict-plus-operands": ["warn", { "checkCompoundAssignments": true }],
+    "@typescript-eslint/switch-exhaustiveness-check": "warn",
+    "@typescript-eslint/unbound-method": ["warn", { "ignoreStatic": true }],
     "@typescript-eslint/unified-signatures": "warn"
   }
 }
