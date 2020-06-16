@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import Sentry from "@sentry/node";
+import { withScope } from "@sentry/node";
 
 import { randomInArray } from "../util/index";
 import { DATA_DIR } from "../env";
@@ -58,11 +58,11 @@ export default async function getConceptImageUrls(
     if (images.length >= count) {
       return {
         item,
-        images
+        images,
       };
     }
 
-    Sentry.withScope(scope => {
+    withScope((scope) => {
       scope.setExtra("term", item);
       scope.setExtra("image count", images.length);
       scope.setExtra("retries remaining", retries);
@@ -73,7 +73,7 @@ export default async function getConceptImageUrls(
 
     if (retries > 0) {
       console.log("Retrying after delay, retries remaining:", retries);
-      await new Promise(res => setTimeout(res, 5000));
+      await new Promise((res) => setTimeout(res, 5000));
     }
   }
   /* eslint-enable no-await-in-loop */
