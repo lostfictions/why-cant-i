@@ -2,7 +2,7 @@ require("source-map-support").install();
 import { createReadStream } from "fs";
 import Masto from "masto";
 import retry from "async-retry";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 import { makeLimeguy } from "./limeguy";
 import pluralize from "./util/pluralize";
@@ -19,19 +19,19 @@ async function doTwoot(): Promise<void> {
     async () => {
       const masto = await Masto.login({
         uri: MASTODON_SERVER,
-        accessToken: MASTODON_TOKEN
+        accessToken: MASTODON_TOKEN,
       });
 
       const { id } = await masto.uploadMediaAttachment({
         file: createReadStream(filename),
-        description
+        description,
       });
 
       return masto.createStatus(
         {
           status: description,
           visibility: "public",
-          media_ids: [id]
+          media_ids: [id],
         },
         idempotencyKey
       );
