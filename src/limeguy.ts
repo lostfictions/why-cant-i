@@ -42,7 +42,7 @@ export async function makeLimeguy(): Promise<{
     [856, 1336],
     [700, 1324],
     [436, 1312],
-    [588, 1264]
+    [588, 1264],
   ].map(([x, y]) => [x * scale, y * scale]);
   // prettier-ignore
   const midgroundLimes = [
@@ -109,7 +109,7 @@ export async function makeLimeguy(): Promise<{
 
   return new Promise<{ filename: string; item: string }>((res, rej) => {
     outStream.on("finish", () => res({ filename, item }));
-    outStream.on("error", e => rej(e));
+    outStream.on("error", (e) => rej(e));
   });
 
   async function drawImages(coordSet: number[][]) {
