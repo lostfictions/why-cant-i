@@ -6,40 +6,44 @@
   "main": "dist/main.js",
   "scripts": {
     "start": "node dist/main.js",
-    "build": "rm -rf dist/ && tsc",
-    "test": "tsc --noEmit && eslint './src/**/*' && prettier 'src/**/*' -l",
     "dev": "ts-node --transpile-only src/main.ts -- local",
+    "build": "rm -rf dist/ && tsc",
+    "test": "run-s -l test:*",
+    "test:ts": "tsc --noEmit",
+    "test:eslint": "eslint --color 'src/**/*'",
+    "test:prettier": "prettier 'src/**/*' -l",
     "prettier": "prettier 'src/**/*' --write"
   },
   "author": "s <https://github.com/lostfictions>",
   "license": "AGPL-3.0",
   "dependencies": {
-    "@sentry/integrations": "^5.17.0",
-    "@sentry/node": "^5.17.0",
+    "@sentry/integrations": "^5.28.0",
+    "@sentry/node": "^5.28.0",
     "async-retry": "^1.3.1",
-    "axios": "^0.19.2",
+    "axios": "^0.21.0",
     "canvas": "^2.6.1",
     "cheerio": "^0.22.0",
     "envalid": "^6.0.2",
     "masto": "^2.8.2",
     "source-map-support": "^0.5.19",
-    "uuid": "^8.1.0"
+    "uuid": "^8.3.1"
   },
   "devDependencies": {
     "@types/async-retry": "^1.4.2",
-    "@types/cheerio": "^0.22.18",
-    "@types/node": "^14.0.13",
-    "@types/uuid": "^8.0.0",
-    "@typescript-eslint/eslint-plugin": "^3.3.0",
-    "@typescript-eslint/parser": "^3.3.0",
-    "eslint": "^7.2.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-node": "^11.1.0",
-    "prettier": "^2.0.5",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+    "@types/cheerio": "^0.22.22",
+    "@types/node": "^14.14.10",
+    "@types/uuid": "^8.3.0",
+    "eslint": "^7.15.0",
+    "eslint-config-lostfictions": "^0.4.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.2.1",
+    "ts-node": "^9.1.0",
+    "typescript": "^4.1.2"
   },
   "engines": {
-    "node": ">=12"
+    "node": "^14"
+  },
+  "resolutions": {
+    "**/needle": "^2.5.2"
   }
 }

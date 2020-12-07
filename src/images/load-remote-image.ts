@@ -5,7 +5,7 @@ export default async function loadRemoteImage(src: string): Promise<Image> {
   const resp = await axios.get(src, { responseType: "arraybuffer" });
   const buff = Buffer.from(resp.data);
   const image = new Image();
-  const imageLoad = new Promise((res, rej) => {
+  const imageLoad = new Promise<void>((res, rej) => {
     image.onload = res;
     image.onerror = rej;
   });

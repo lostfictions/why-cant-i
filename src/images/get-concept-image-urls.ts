@@ -62,10 +62,11 @@ export default async function getConceptImageUrls(
       };
     }
 
+    const r = retries;
     withScope((scope) => {
       scope.setExtra("term", item);
       scope.setExtra("image count", images.length);
-      scope.setExtra("retries remaining", retries);
+      scope.setExtra("retries remaining", r);
       console.warn(`Couldn't find enough images while searching!`);
     });
 
@@ -73,7 +74,9 @@ export default async function getConceptImageUrls(
 
     if (retries > 0) {
       console.log("Retrying after delay, retries remaining:", retries);
-      await new Promise((res) => setTimeout(res, 5000));
+      await new Promise((res) => {
+        setTimeout(res, 5000);
+      });
     }
   }
   /* eslint-enable no-await-in-loop */

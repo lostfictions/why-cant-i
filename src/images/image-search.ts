@@ -77,8 +77,7 @@ export function parse(html: string) {
 }
 
 const PREFIX = "AF_initDataCallback";
-
-export function allJsonpStrategy($: CheerioStatic): string[] | false {
+export function allJsonpStrategy($: cheerio.Root): string[] | false {
   const scripts = $("script")
     .toArray()
     .map((el) => $(el).text())
@@ -89,7 +88,13 @@ export function allJsonpStrategy($: CheerioStatic): string[] | false {
       .flatMap((script) => [
         ...script.matchAll(/"(https?:\/\/[^"]+\.(?:jpe?g|gifv?|png))"/g),
       ])
-      .map((res) => res[1]);
+      .map((res) =>
+        // google image search results sometimes contain code points encoded as
+        // eg. \u003d, so replace them with their actual values
+        res[1].replace(/\\u([a-fA-F0-9]{4})/gi, (_, g) =>
+          String.fromCodePoint(parseInt(g, 16))
+        )
+      );
   }
 
   return false;
