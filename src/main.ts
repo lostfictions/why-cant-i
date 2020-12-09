@@ -22,16 +22,18 @@ async function doTwoot(): Promise<void> {
         accessToken: MASTODON_TOKEN,
       });
 
-      const { id } = await masto.uploadMediaAttachment({
+      const { id } = await masto.createMediaAttachment({
         file: createReadStream(filename),
         description,
       });
+
+      await masto.waitForMediaAttachment(id);
 
       return masto.createStatus(
         {
           status: description,
           visibility: "public",
-          media_ids: [id],
+          mediaIds: [id],
         },
         idempotencyKey
       );
@@ -40,7 +42,7 @@ async function doTwoot(): Promise<void> {
   );
 
   console.log(description);
-  console.log(`${status.created_at} -> ${status.uri}`);
+  console.log(`${status.createdAt} -> ${status.uri}`);
 }
 
 const argv = process.argv.slice(2);

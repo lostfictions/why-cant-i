@@ -17,27 +17,27 @@
   "author": "s <https://github.com/lostfictions>",
   "license": "AGPL-3.0",
   "dependencies": {
-    "@sentry/integrations": "^5.28.0",
-    "@sentry/node": "^5.28.0",
+    "@sentry/integrations": "^5.29.0",
+    "@sentry/node": "^5.29.0",
     "async-retry": "^1.3.1",
     "axios": "^0.21.0",
     "canvas": "^2.6.1",
     "cheerio": "^0.22.0",
     "envalid": "^6.0.2",
-    "masto": "^2.8.2",
+    "masto": "^3.6.4",
     "source-map-support": "^0.5.19",
-    "uuid": "^8.3.1"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/async-retry": "^1.4.2",
-    "@types/cheerio": "^0.22.22",
-    "@types/node": "^14.14.10",
+    "@types/cheerio": "^0.22.23",
+    "@types/node": "^14.14.11",
     "@types/uuid": "^8.3.0",
     "eslint": "^7.15.0",
-    "eslint-config-lostfictions": "^0.4.0",
+    "eslint-config-lostfictions": "^0.5.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.2.1",
-    "ts-node": "^9.1.0",
+    "ts-node": "^9.1.1",
     "typescript": "^4.1.2"
   },
   "engines": {
