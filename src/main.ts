@@ -4,7 +4,14 @@ import retry from "async-retry";
 import { makeLimeguy } from "./limeguy";
 import pluralize from "./util/pluralize";
 import { doTwoot } from "./twoot";
-import { MASTODON_SERVER, MASTODON_TOKEN } from "./env";
+import {
+  MASTODON_SERVER,
+  MASTODON_TOKEN,
+  TWITTER_ACCESS_SECRET,
+  TWITTER_ACCESS_TOKEN,
+  TWITTER_API_KEY,
+  TWITTER_API_SECRET,
+} from "./env";
 
 async function generateAndTwoot(): Promise<void> {
   const { filename, item } = await retry(makeLimeguy, { retries: 5 });
@@ -12,7 +19,16 @@ async function generateAndTwoot(): Promise<void> {
 
   await doTwoot(
     [{ status: description, pathToMedia: filename }],
-    [{ type: "mastodon", server: MASTODON_SERVER, token: MASTODON_TOKEN }]
+    [
+      { type: "mastodon", server: MASTODON_SERVER, token: MASTODON_TOKEN },
+      {
+        type: "twitter",
+        apiKey: TWITTER_API_KEY,
+        apiSecret: TWITTER_API_SECRET,
+        accessToken: TWITTER_ACCESS_TOKEN,
+        accessSecret: TWITTER_ACCESS_SECRET,
+      },
+    ]
   );
 }
 
