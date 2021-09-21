@@ -6,13 +6,15 @@
     ],
     "module": "commonjs",
     "outDir": "dist",
-    "allowJs": true,
     "strict": true,
+    "noPropertyAccessFromIndexSignature": true,
+    // "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,
     "sourceMap": true,
     "rootDir": "./src",
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "skipLibCheck": true
   },
   "include": [
     "src"

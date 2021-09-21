@@ -3,17 +3,10 @@ import * as envalid from "envalid";
 import * as Sentry from "@sentry/node";
 import { CaptureConsole } from "@sentry/integrations";
 
-export const {
-  DATA_DIR,
-  MASTODON_SERVER,
-  MASTODON_TOKEN,
-  SENTRY_DSN,
-  isDev,
-} = envalid.cleanEnv(
+export const { DATA_DIR, MASTODON_TOKEN, SENTRY_DSN, isDev } = envalid.cleanEnv(
   process.env,
   {
     DATA_DIR: envalid.str({ default: "persist" }),
-    MASTODON_SERVER: envalid.url({ default: "https://mastodon.social" }),
     MASTODON_TOKEN: envalid.str(),
     SENTRY_DSN: envalid.str({ default: "" }),
   },
@@ -37,3 +30,5 @@ if (SENTRY_DSN.length === 0) {
     ],
   });
 }
+
+export const MASTODON_SERVER = "https://mastodon.social";
