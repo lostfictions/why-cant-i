@@ -23,7 +23,7 @@ jobs:
       - run: yarn build
       - run: yarn start
         env:
-          DATA_DIR: ${{ env.GITHUB_WORKSPACE }}
+          DATA_DIR: "data_repo"
           MASTODON_TOKEN: ${{ secrets.MASTODON_TOKEN }}
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
           TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
