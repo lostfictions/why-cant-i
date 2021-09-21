@@ -6,7 +6,7 @@ import { CaptureConsole } from "@sentry/integrations";
 export const { DATA_DIR, MASTODON_TOKEN, SENTRY_DSN, isDev } = envalid.cleanEnv(
   process.env,
   {
-    DATA_DIR: envalid.str({ default: "persist" }),
+    DATA_DIR: envalid.str({ devDefault: "persist" }),
     MASTODON_TOKEN: envalid.str(),
     SENTRY_DSN: envalid.str({ default: "" }),
   },
