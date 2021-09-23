@@ -2740,7 +2740,6 @@ module.exports = [
   "camellias",
   "carnation",
   "chrysantemum",
-  "columbine",
   "clover",
   "crocus",
   "daisy",
@@ -4159,5 +4158,5 @@ module.exports = [
   "Thai Lilac",
   "Turkish Angora",
   "Turkish Van",
-  "Ukrainian Levkoy"
+  "Ukrainian Levkoy",
 ];
