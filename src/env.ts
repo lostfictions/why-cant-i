@@ -1,38 +1,35 @@
-import * as fs from "fs";
-import * as envalid from "envalid";
+/* eslint-disable node/no-process-env */
+import { join } from "path";
+import { existsSync } from "fs";
+
 import * as Sentry from "@sentry/node";
 import { CaptureConsole } from "@sentry/integrations";
+import { parseEnv, z } from "znv";
 
-export const {
-  DATA_DIR,
-  MASTODON_TOKEN,
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET,
-  TWITTER_ACCESS_TOKEN,
-  TWITTER_ACCESS_SECRET,
-  SENTRY_DSN,
-  isDev,
-} = envalid.cleanEnv(
-  process.env,
-  {
-    DATA_DIR: envalid.str({ devDefault: "persist" }),
-    MASTODON_TOKEN: envalid.str(),
-    TWITTER_API_KEY: envalid.str(),
-    TWITTER_API_SECRET: envalid.str(),
-    TWITTER_ACCESS_TOKEN: envalid.str(),
-    TWITTER_ACCESS_SECRET: envalid.str(),
-    SENTRY_DSN: envalid.str({ default: "" }),
-  },
-  { strict: true }
-);
+const isDev = process.env["NODE_ENV"] !== "production";
 
-if (!fs.existsSync(DATA_DIR)) {
-  throw new Error(`Data directory '${DATA_DIR}' doesn't exist!`);
+if (isDev) {
+  require("dotenv").config();
 }
 
-if (SENTRY_DSN.length === 0) {
+export const { MASTODON_TOKEN, SENTRY_DSN, DATA_DIR } = parseEnv(process.env, {
+  MASTODON_TOKEN: {
+    schema: z.string().min(1),
+    defaults: { development: "_" },
+  },
+  SENTRY_DSN: {
+    schema: z.string().min(1).optional(),
+  },
+  // The resource dir is currently checked in to the repo.
+  DATA_DIR: z
+    .string()
+    .min(1)
+    .default(() => join(__dirname, "..", "persist")),
+});
+
+if (!SENTRY_DSN && !isDev) {
   console.warn(
-    `Sentry DSN is invalid! Error reporting to sentry will be disabled.`
+    `Sentry DSN is invalid! Error reporting to Sentry will be disabled.`,
   );
 } else {
   Sentry.init({
@@ -42,6 +39,10 @@ if (SENTRY_DSN.length === 0) {
       new CaptureConsole({ levels: ["warn", "error", "debug", "assert"] }),
     ],
   });
+}
+
+if (!existsSync(DATA_DIR)) {
+  throw new Error(`Data directory '${DATA_DIR}' doesn't exist!`);
 }
 
 export const MASTODON_SERVER = "https://mastodon.social";

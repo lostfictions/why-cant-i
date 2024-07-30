@@ -1,39 +1,26 @@
-import * as fs from "fs";
 import * as path from "path";
-import { tmpdir } from "os";
 
-import { createCanvas, loadImage, registerFont, Image } from "canvas";
+import { GlobalFonts, createCanvas, loadImage, Canvas } from "@napi-rs/canvas";
 
 import pluralize from "./util/pluralize";
 import getConceptImageUrls from "./images/get-concept-image-urls";
-import loadRemoteImage from "./images/load-remote-image";
 
 const staticDataDir = path.join(__dirname, "../data");
-registerFont(path.join(staticDataDir, "impact.ttf"), { family: "Impact" });
 
-const outDir = tmpdir();
-
-let filenameIndex = 0;
-
-let originalLimeguy: Image;
-let midgroundLimeguy: Image;
-let foregroundLimeguy: Image;
+GlobalFonts.registerFromPath(path.join(staticDataDir, "impact.ttf"), "Impact");
 
 const maxHeight = 800;
 
 export async function makeLimeguy(): Promise<{
-  filename: string;
+  canvas: Canvas;
   item: string;
 }> {
-  if (!originalLimeguy) {
-    originalLimeguy = await loadImage(path.join(staticDataDir, "limeguy.jpg"));
-    midgroundLimeguy = await loadImage(
-      path.join(staticDataDir, "limeguy_midground.png")
-    );
-    foregroundLimeguy = await loadImage(
-      path.join(staticDataDir, "limeguy_foreground.png")
-    );
-  }
+  const [originalLimeguy, midgroundLimeguy, foregroundLimeguy] =
+    await Promise.all([
+      loadImage(path.join(staticDataDir, "limeguy.jpg")),
+      loadImage(path.join(staticDataDir, "limeguy_midground.png")),
+      loadImage(path.join(staticDataDir, "limeguy_foreground.png")),
+    ]);
 
   const scale = maxHeight / originalLimeguy.height;
 
@@ -63,6 +50,36 @@ export async function makeLimeguy(): Promise<{
   const { item, images } = await getConceptImageUrls(backgroundLimes.length);
 
   let imgIndex = 0;
+  const drawImages = async (coordSet: number[][]) => {
+    let didDrawAny = false;
+    for (const [limeX, limeY] of coordSet) {
+      let didDraw = false;
+      while (!didDraw && imgIndex < images.length) {
+        try {
+          const image = await loadImage(images[imgIndex]);
+          const aspect = image.width / image.height;
+          ctx.drawImage(
+            image,
+            limeX - (size * aspect) / 2,
+            limeY - size / 2,
+            size * aspect,
+            size,
+          );
+          didDraw = true;
+          didDrawAny = true;
+        } catch (e) {
+          // We don't care about (most) failures. Just retry with another URL.
+          // Checking for real, persistent errors is I guess TODO.
+          // console.warn(`can't load url: ${images[imgIndex]}:\n[${e}]\n`);
+        }
+        imgIndex++;
+      }
+    }
+    if (!didDrawAny) {
+      console.warn(`couldn't draw any images! urls:\n[${images.join("\n")}\n]`);
+    }
+  };
+
   ctx.drawImage(originalLimeguy, 0, 0, maxHeight * canvasAspect, maxHeight);
   await drawImages(backgroundLimes);
   ctx.drawImage(midgroundLimeguy, 0, 0, maxHeight * canvasAspect, maxHeight);
@@ -95,46 +112,10 @@ export async function makeLimeguy(): Promise<{
     fontSize -= 1;
     ctx.font = `${fontSize}px Impact`;
     if (fontSize < 1) throw new Error("node-canvas will never be satisfied");
-  } while (ctx.measureText(bottomText + "xx").width > canvas.width);
+  } while (ctx.measureText(`${bottomText}xx`).width > canvas.width);
 
   ctx.fillText(bottomText, canvas.width / 2, canvas.height - 10);
   ctx.strokeText(bottomText, canvas.width / 2, canvas.height - 10);
 
-  filenameIndex += 1;
-  const filename = path.join(outDir, `whycanti_${filenameIndex}.png`);
-
-  const pngStream = canvas.createPNGStream();
-  const outStream = fs.createWriteStream(filename);
-  pngStream.pipe(outStream);
-
-  return new Promise<{ filename: string; item: string }>((res, rej) => {
-    outStream.on("finish", () => res({ filename, item }));
-    outStream.on("error", (e) => rej(e));
-  });
-
-  async function drawImages(coordSet: number[][]) {
-    for (const [limeX, limeY] of coordSet) {
-      let didDraw = false;
-      while (!didDraw && imgIndex < images.length) {
-        try {
-          // eslint-disable-next-line no-await-in-loop
-          const image = await loadRemoteImage(images[imgIndex]);
-          const aspect = image.width / image.height;
-          ctx.drawImage(
-            image,
-            limeX - (size * aspect) / 2,
-            limeY - size / 2,
-            size * aspect,
-            size
-          );
-          didDraw = true;
-        } catch (e) {
-          // We don't care about (most) failures. Just retry with another URL.
-          // Checking for real, persistent errors is I guess TODO.
-          // console.warn(`can't load url: ${images[imgIndex]}:\n[${e}]\n`);
-        }
-        imgIndex++;
-      }
-    }
-  }
+  return { canvas, item };
 }

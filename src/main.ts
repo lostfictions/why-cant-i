@@ -1,47 +1,58 @@
-require("source-map-support").install();
+import { join } from "path";
+import { tmpdir } from "os";
+import { writeFile } from "fs/promises";
+
 import retry from "async-retry";
+import { twoot } from "twoot";
 
 import { makeLimeguy } from "./limeguy";
 import pluralize from "./util/pluralize";
-import { doTwoot } from "./twoot";
-import {
-  MASTODON_SERVER,
-  MASTODON_TOKEN,
-  TWITTER_ACCESS_SECRET,
-  TWITTER_ACCESS_TOKEN,
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET,
-} from "./env";
+import { MASTODON_SERVER, MASTODON_TOKEN } from "./env";
 
-async function generateAndTwoot(): Promise<void> {
-  const { filename, item } = await retry(makeLimeguy, { retries: 5 });
-  const description = `why cant I, hold all these ${pluralize(item)}?`;
+async function doToot(): Promise<void> {
+  const { canvas, item } = await retry(makeLimeguy, { retries: 5 });
+  const caption = `why cant I, hold all these ${pluralize(item)}?`;
 
-  await doTwoot(
-    [{ status: description, pathToMedia: filename }],
-    [
-      { type: "mastodon", server: MASTODON_SERVER, token: MASTODON_TOKEN },
-      {
-        type: "twitter",
-        apiKey: TWITTER_API_KEY,
-        apiSecret: TWITTER_API_SECRET,
-        accessToken: TWITTER_ACCESS_TOKEN,
-        accessSecret: TWITTER_ACCESS_SECRET,
-      },
-    ]
+  const buffer = canvas.toBuffer("image/png");
+
+  const res = await twoot(
+    {
+      status: caption,
+      media: [{ buffer, caption }],
+    },
+    {
+      type: "mastodon",
+      server: MASTODON_SERVER,
+      token: MASTODON_TOKEN,
+    },
   );
+
+  console.log(res.status.url);
 }
 
 const argv = process.argv.slice(2);
 
 if (argv.includes("local")) {
   console.log("Running locally!");
-  void makeLimeguy().then(({ filename, item }) =>
-    console.log(
-      `why cant I, hold all these ${pluralize(item)}?\nfile://${filename}\n`
-    )
-  );
+  (async () => {
+    const { canvas, item } = await makeLimeguy();
+    const buffer = canvas.toBuffer("image/png");
+
+    const caption = `why cant I, hold all these ${pluralize(item)}?`;
+
+    const filename = join(
+      tmpdir(),
+      `why-cant-i--${new Date().toISOString().replaceAll(/:|\./g, "-")}.png`,
+    );
+
+    await writeFile(filename, buffer);
+
+    console.log(`${caption}\nfile://${filename}\n`);
+  })().catch((e) => {
+    throw e;
+  });
 } else {
-  console.log("Running in production!");
-  void generateAndTwoot().then(() => process.exit(0));
+  doToot().catch((e) => {
+    throw e;
+  });
 }

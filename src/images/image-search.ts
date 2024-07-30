@@ -1,10 +1,10 @@
 import axios from "axios";
-import cheerio from "cheerio";
+import { load, type CheerioAPI } from "cheerio";
 
 export default async function imageSearch(
   query: string,
   exact = true,
-  minimumCount?: number
+  minimumCount?: number,
 ): Promise<string[]> {
   const urls = await requestAndParse({ term: query, exact, transparent: true });
 
@@ -17,8 +17,8 @@ export default async function imageSearch(
             term: query,
             transparent: true,
             exact: false,
-          })
-        )
+          }),
+        ),
       ),
     ];
   }
@@ -64,9 +64,9 @@ export function request({
 }
 
 export function parse(html: string) {
-  const $ = cheerio.load(html);
+  const $ = load(html);
 
-  const strategies = [allJsonpStrategy];
+  const strategies = [genericScriptPayloadStrategy, allJsonpStrategy];
 
   for (const s of strategies) {
     const res = s($);
@@ -76,8 +76,31 @@ export function parse(html: string) {
   return [];
 }
 
+// identical to older `allJsonpStrategy` below, but without filtering
+export function genericScriptPayloadStrategy($: CheerioAPI): string[] | false {
+  const scripts = $("script")
+    .toArray()
+    .map((el) => $(el).text());
+
+  if (scripts.length > 0) {
+    return scripts
+      .flatMap((script) => [
+        ...script.matchAll(/"(https?:\/\/[^"]+\.(?:jpe?g|gifv?|png))"/g),
+      ])
+      .map((res) =>
+        // google image search results sometimes contain code points encoded as
+        // eg. \u003d, so replace them with their actual values
+        res[1].replaceAll(/\\u([a-fA-F0-9]{4})/gi, (_, g) =>
+          String.fromCodePoint(parseInt(g, 16)),
+        ),
+      );
+  }
+
+  return false;
+}
+
 const PREFIX = "AF_initDataCallback";
-export function allJsonpStrategy($: cheerio.Root): string[] | false {
+export function allJsonpStrategy($: CheerioAPI): string[] | false {
   const scripts = $("script")
     .toArray()
     .map((el) => $(el).text())
@@ -91,9 +114,9 @@ export function allJsonpStrategy($: cheerio.Root): string[] | false {
       .map((res) =>
         // google image search results sometimes contain code points encoded as
         // eg. \u003d, so replace them with their actual values
-        res[1].replace(/\\u([a-fA-F0-9]{4})/gi, (_, g) =>
-          String.fromCodePoint(parseInt(g, 16))
-        )
+        res[1].replaceAll(/\\u([a-fA-F0-9]{4})/gi, (_, g) =>
+          String.fromCodePoint(parseInt(g, 16)),
+        ),
       );
   }
 

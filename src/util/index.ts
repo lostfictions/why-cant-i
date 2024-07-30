@@ -5,14 +5,14 @@
  * @returns The escaped string, usable in a regular expression constructor.
  */
 export function escapeForRegex(expression: string): string {
-  return expression.replace(/[\\^$*+?.()|[\]{}]/g, "\\$&");
+  return expression.replaceAll(/[\\^$*+?.()|[\]{}]/g, "\\$&");
 }
 
 /** Returns a random number between min (inclusive) and max (exclusive). */
 export function randomInt(max: number): number;
 export function randomInt(min: number, max?: number): number {
   /* eslint-disable no-param-reassign */
-  if (typeof max === "undefined") {
+  if (max === undefined) {
     max = min;
     min = 0;
   }
@@ -32,7 +32,7 @@ export interface WeightedValues {
   [value: string]: number;
 }
 export function randomByWeight<T extends WeightedValues, K extends keyof T>(
-  weights: T
+  weights: T,
 ): K {
   const keys = Object.keys(weights) as K[];
   const sum = Object.values(weights).reduce((p, c) => {

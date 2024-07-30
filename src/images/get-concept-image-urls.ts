@@ -9,14 +9,14 @@ import imageSearch from "./image-search";
 let conceptsBag: Set<string>;
 try {
   const conceptsFromFile = JSON.parse(
-    fs.readFileSync(path.join(DATA_DIR, "unused-concepts.json")).toString()
+    fs.readFileSync(path.join(DATA_DIR, "unused-concepts.json")).toString(),
   );
   if (!Array.isArray(conceptsFromFile)) {
     throw new Error("Concepts bag loaded from file is not an array!");
   }
   conceptsBag = new Set(conceptsFromFile);
 } catch (e) {
-  console.warn(`Cannot load concepts from file!\n[${e}]`);
+  console.warn(`Cannot load concepts from file!\n[${String(e)}]`);
   refillConceptsBag();
 }
 
@@ -26,7 +26,7 @@ function refillConceptsBag(): void {
   conceptsBag = new Set(concepts);
   fs.writeFileSync(
     path.join(DATA_DIR, "unused-concepts.json"),
-    JSON.stringify([...conceptsBag], undefined, 2)
+    JSON.stringify([...conceptsBag], undefined, 2),
   );
 }
 
@@ -38,7 +38,7 @@ function getRandomUnusedConcept(): string {
   } else {
     fs.writeFileSync(
       path.join(DATA_DIR, "unused-concepts.json"),
-      JSON.stringify([...conceptsBag], undefined, 2)
+      JSON.stringify([...conceptsBag], undefined, 2),
     );
   }
 
@@ -46,11 +46,10 @@ function getRandomUnusedConcept(): string {
 }
 
 export default async function getConceptImageUrls(
-  count: number
+  count: number,
 ): Promise<{ item: string; images: string[] }> {
   let retries = 3;
 
-  /* eslint-disable no-await-in-loop */
   while (retries > 0) {
     const item = getRandomUnusedConcept();
     const images = await imageSearch(item, false, count);
@@ -79,7 +78,6 @@ export default async function getConceptImageUrls(
       });
     }
   }
-  /* eslint-enable no-await-in-loop */
 
   throw new Error(`Couldn't retrieve images and maximum retries exceeded`);
 }
