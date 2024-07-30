@@ -3,7 +3,6 @@ import { join } from "path";
 import { existsSync } from "fs";
 
 import * as Sentry from "@sentry/node";
-import { CaptureConsole } from "@sentry/integrations";
 import { parseEnv, z } from "znv";
 
 const isDev = process.env["NODE_ENV"] !== "production";
@@ -36,7 +35,9 @@ if (!SENTRY_DSN && !isDev) {
     dsn: SENTRY_DSN,
     environment: isDev ? "dev" : "prod",
     integrations: [
-      new CaptureConsole({ levels: ["warn", "error", "debug", "assert"] }),
+      Sentry.captureConsoleIntegration({
+        levels: ["warn", "error", "debug", "assert"],
+      }),
     ],
   });
 }
