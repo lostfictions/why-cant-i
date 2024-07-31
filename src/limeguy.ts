@@ -1,6 +1,7 @@
 import * as path from "path";
 
 import { GlobalFonts, createCanvas, loadImage, Canvas } from "@napi-rs/canvas";
+import { addBreadcrumb } from "@sentry/node";
 
 import pluralize from "./util/pluralize";
 import getConceptImageUrls from "./images/get-concept-image-urls";
@@ -56,6 +57,10 @@ export async function makeLimeguy(): Promise<{
       let didDraw = false;
       while (!didDraw && imgIndex < images.length) {
         try {
+          addBreadcrumb({
+            message: "loading image to draw",
+            data: { image: images[imgIndex] },
+          });
           const image = await loadImage(images[imgIndex]);
           const aspect = image.width / image.height;
           ctx.drawImage(
