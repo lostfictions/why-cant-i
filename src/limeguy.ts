@@ -59,8 +59,11 @@ export async function makeLimeguy(): Promise<{
         try {
           addBreadcrumb({
             message: "loading image to draw",
+            category: "image drawing",
             data: { image: images[imgIndex] },
           });
+          // FIXME: fetch ourselves to handle 403, etc? some failures here seem to
+          // escape our try-catch...
           const image = await loadImage(images[imgIndex]);
           const aspect = image.width / image.height;
           ctx.drawImage(
@@ -72,10 +75,13 @@ export async function makeLimeguy(): Promise<{
           );
           didDraw = true;
           didDrawAny = true;
-        } catch (e) {
+        } catch (error) {
           // We don't care about (most) failures. Just retry with another URL.
-          // Checking for real, persistent errors is I guess TODO.
-          // console.warn(`can't load url: ${images[imgIndex]}:\n[${e}]\n`);
+          addBreadcrumb({
+            message: "caught error drawing image (should be non-fatal)",
+            category: "image drawing",
+            data: { image: images[imgIndex], error },
+          });
         }
         imgIndex++;
       }
