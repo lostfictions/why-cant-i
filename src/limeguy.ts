@@ -1,7 +1,7 @@
 import * as path from "path";
 
 import { GlobalFonts, createCanvas, loadImage, Canvas } from "@napi-rs/canvas";
-import { addBreadcrumb } from "@sentry/node";
+import { addBreadcrumb, flush } from "@sentry/node";
 
 import pluralize from "./util/pluralize";
 import getConceptImageUrls from "./images/get-concept-image-urls";
@@ -50,6 +50,12 @@ export async function makeLimeguy(): Promise<{
 
   const { item, images } = await getConceptImageUrls(backgroundLimes.length);
 
+  addBreadcrumb({
+    message: "got image urls",
+    category: "image drawing",
+    data: { images },
+  });
+
   let imgIndex = 0;
   const drawImages = async (coordSet: number[][]) => {
     let didDrawAny = false;
@@ -62,6 +68,7 @@ export async function makeLimeguy(): Promise<{
             category: "image drawing",
             data: { image: images[imgIndex] },
           });
+          await flush(5000);
           // FIXME: fetch ourselves to handle 403, etc? some failures here seem to
           // escape our try-catch...
           const image = await loadImage(images[imgIndex]);
