@@ -4,10 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@napi-rs/canvas@0.1.44':
+    hash: eqwdbjepc7x2jky6r3xxrrbu74
+    path: patches/@napi-rs__canvas@0.1.44.patch
+
 dependencies:
   '@napi-rs/canvas':
     specifier: ^0.1.44
-    version: 0.1.44
+    version: 0.1.44(patch_hash=eqwdbjepc7x2jky6r3xxrrbu74)
   '@sentry/integrations':
     specifier: 7.118.0
     version: 7.118.0
@@ -264,7 +269,7 @@ packages:
     dev: false
     optional: true
 
-  /@napi-rs/canvas@0.1.44:
+  /@napi-rs/canvas@0.1.44(patch_hash=eqwdbjepc7x2jky6r3xxrrbu74):
     resolution: {integrity: sha512-IyhSndjw29LR1WqkUZvTJI4j8Ve1QGbZYtpdQjJjcFvsvJS4/WHzOWV8ZciLPJBhrYvSQf/JbZJy5LHmFV+plg==}
     engines: {node: '>= 10'}
     optionalDependencies:
@@ -278,6 +283,7 @@ packages:
       '@napi-rs/canvas-linux-x64-musl': 0.1.44
       '@napi-rs/canvas-win32-x64-msvc': 0.1.44
     dev: false
+    patched: true
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}

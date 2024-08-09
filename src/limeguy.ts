@@ -69,8 +69,7 @@ export async function makeLimeguy(): Promise<{
             data: { image: images[imgIndex] },
           });
           await flush(5000);
-          // FIXME: fetch ourselves to handle 403, etc? some failures here seem to
-          // escape our try-catch...
+
           const image = await loadImage(images[imgIndex]);
           const aspect = image.width / image.height;
           ctx.drawImage(
