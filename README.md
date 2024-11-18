@@ -2,6 +2,8 @@ why cant i, hold all these different kinds of item
 
 **https://mastodon.social/@limeguy**
 
+**https://bsky.app/profile/limesguy.bsky.social**
+
 ~~https://twitter.com/limesbot~~ (twitter bot broken with x dot com's api changes)
 
 ![why cant I, hold all these](https://i.imgur.com/gBDp6Qs.png)
