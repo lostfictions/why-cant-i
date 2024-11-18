@@ -16,6 +16,8 @@ jobs:
           ref: "data"
           path: "data_repo"
       - uses: pnpm/action-setup@18ac635edf3d6cd3e88d281bceecc25c4dbc1e73
+        with:
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".node-version"
@@ -28,6 +30,8 @@ jobs:
           NODE_ENV: "production"
           MASTODON_TOKEN: ${{ secrets.MASTODON_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          BSKY_USERNAME: ${{ secrets.BSKY_USERNAME }}
+          BSKY_PASSWORD: ${{ secrets.BSKY_PASSWORD }}
       - name: Commit and push if changed
         run: |-
           cd data_repo

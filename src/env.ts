@@ -11,8 +11,22 @@ if (isDev) {
   require("dotenv").config();
 }
 
-export const { MASTODON_TOKEN, SENTRY_DSN, DATA_DIR } = parseEnv(process.env, {
+export const {
+  MASTODON_TOKEN,
+  BSKY_USERNAME,
+  BSKY_PASSWORD,
+  SENTRY_DSN,
+  DATA_DIR,
+} = parseEnv(process.env, {
   MASTODON_TOKEN: {
+    schema: z.string().min(1),
+    defaults: { development: "_" },
+  },
+  BSKY_USERNAME: {
+    schema: z.string().min(1),
+    defaults: { development: "_" },
+  },
+  BSKY_PASSWORD: {
     schema: z.string().min(1),
     defaults: { development: "_" },
   },

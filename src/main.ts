@@ -7,7 +7,12 @@ import { twoot } from "twoot";
 
 import { makeLimeguy } from "./limeguy";
 import pluralize from "./util/pluralize";
-import { MASTODON_SERVER, MASTODON_TOKEN } from "./env";
+import {
+  BSKY_PASSWORD,
+  BSKY_USERNAME,
+  MASTODON_SERVER,
+  MASTODON_TOKEN,
+} from "./env";
 
 async function doToot(): Promise<void> {
   const { canvas, item } = await retry(makeLimeguy, { retries: 5 });
@@ -20,14 +25,29 @@ async function doToot(): Promise<void> {
       status: caption,
       media: [{ buffer, caption }],
     },
-    {
-      type: "mastodon",
-      server: MASTODON_SERVER,
-      token: MASTODON_TOKEN,
-    },
+    [
+      {
+        type: "mastodon",
+        server: MASTODON_SERVER,
+        token: MASTODON_TOKEN,
+      },
+      {
+        type: "bsky",
+        username: BSKY_USERNAME,
+        password: BSKY_PASSWORD,
+      },
+    ],
   );
 
-  console.log(res.status.url);
+  for (const r of res) {
+    if (r.type === "error") {
+      console.error(`error while twooting:\n${r.message}\n`);
+    } else if (r.type === "bsky") {
+      console.log(`skeeted at '${r.status.uri}'!`);
+    } else {
+      console.log(`tooted at '${r.status.url}'!`);
+    }
+  }
 }
 
 const argv = process.argv.slice(2);
