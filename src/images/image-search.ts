@@ -57,8 +57,7 @@ export function request({
     timeout: 5000,
     headers: {
       "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 " +
-        "(KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36",
+        "Mozilla/5.0 (X11; Linux x86_64; rv:145.0) Gecko/20100101 Firefox/145.0",
     },
   });
 }
